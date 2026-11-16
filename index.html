@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="ky">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TILATA - Профессионалдуу LED Экран Жасоочу</title>
+    <!-- Font Awesome (Социалдык тармактардын иконкалары үчүн) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        body { background-color: #0f172a; color: #fff; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        
+        .panel { background: #1e293b; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); width: 100%; max-width: 1000px; margin-bottom: 20px; }
+        h2, h3 { border-bottom: 2px solid #334155; padding-bottom: 10px; margin-top: 0; color: #38bdf8; }
+        label { display: block; margin: 10px 0 5px; font-weight: bold; font-size: 14px; }
+        input[type="text"], input[type="password"], input[type="number"], select, input[type="file"], input[type="range"], input[type="color"] { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; margin-bottom: 10px; }
+        
+        .btn { background: #0ea5e9; color: #fff; border: none; padding: 12px 20px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; width: 100%; transition: 0.3s; margin-top: 10px; }
+        .btn:hover { background: #0284c7; }
+        .btn-red { background: #ef4444; } .btn-red:hover { background: #dc2626; }
+        .btn-green { background: #10b981; } .btn-green:hover { background: #059669; }
+
+        .page { display: none; width: 100%; max-width: 1000px; }
+        .page.active { display: block; }
+
+        /* LED Экран контейнери */
+        .preview-box { background: #000; border: 10px solid #222; border-radius: 10px; padding: 0; overflow: hidden; margin: 20px 0; position: relative; width: 100%; height: 300px; box-shadow: inset 0 0 20px #000, 0 0 15px rgba(0,255,204,0.2); }
+        
+        #ledCanvas { width: 100%; height: 100%; display: block; }
+
+        .price-tag { font-size: 18px; color: #fbbf24; font-weight: bold; text-align: center; margin-top: -10px; margin-bottom: 20px;}
+        .admin-link { position: fixed; top: 10px; right: 10px; color: #555; text-decoration: none; font-size: 14px; cursor: pointer; }
+        .admin-link:hover { color: #fff; }
+        
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+
+        /* Социалдык тармактардын баскычтары */
+        .social-btns { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 15px; }
+        .social-btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 15px; border-radius: 8px; color: #fff; text-decoration: none; font-weight: bold; border: none; cursor: pointer; transition: 0.2s; font-size: 14px;}
+        .social-btn:hover { opacity: 0.8; transform: scale(1.02); }
+        .whatsapp { background-color: #25D366; }
+        .telegram { background-color: #0088cc; }
+        .instagram { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
+        .tiktok { background-color: #000; border: 1px solid #fff; }
+        
+        .verify-box { background: #0f172a; padding: 15px; border-radius: 8px; border: 1px solid #334155; margin-top: 15px; word-break: break-all; font-size: 14px; }
+        .free-badge { background: #f59e0b; color: #000; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; display: none; }
+    </style>
+</head>
+<body>
+
+    <a class="admin-link" onclick="showPage('adminLoginPage')">⚙️ Админ</a>
+
+    <!-- БАШКЫ БЕТ -->
+    <div id="clientPage" class="page active">
+        <div class="panel" style="text-align: center;">
+            <h1 style="color:#38bdf8; text-shadow: 0 0 10px #38bdf8; margin-bottom: 5px;">TILATA</h1>
+            <p>Профессионалдуу LED-экран жасоочу</p>
+            <span id="adminFreeBadge" class="free-badge">Админ режими: Бекер</span>
+        </div>
+
+        <div class="panel">
+            <h2>1. Дизайнды түзүңүз</h2>
+            
+            <div class="grid-2">
+                <div>
+                    <label>Негизги Текст (Үстү жагы):</label>
+                    <input type="text" id="c_text1" value="EVA MODE" oninput="drawCanvas()">
+                    <label>Негизги Тексттин Түсү:</label>
+                    <input type="color" id="c_color1" value="#ff00ff" oninput="drawCanvas()">
+                </div>
+                <div>
+                    <label>Кошумча Текст (Асты жагы):</label>
+                    <input type="text" id="c_text2" value="Магазин женской одежды" oninput="drawCanvas()">
+                    <label>Кошумча Тексттин Түсү:</label>
+                    <input type="color" id="c_color2" value="#ffff00" oninput="drawCanvas()">
+                </div>
+            </div>
+
+            <hr style="border-color: #334155; margin: 20px 0;">
+
+            <label>Сүрөт жүктөө (Оң жактагы же Сол жактагы үчүн):</label>
+            <input type="file" id="c_image" accept="image/*" onchange="handleImageUpload(event)">
+            <div class="grid-2">
+                <div>
+                    <label>Сүрөттүн өлчөмү:</label>
+                    <input type="range" id="c_imgSize" min="50" max="250" value="150" oninput="drawCanvas()">
+                </div>
+                <div>
+                    <label>Сүрөттүн жайгашуусу (оң/сол):</label>
+                    <select id="c_imgPos" onchange="drawCanvas()">
+                        <option value="right">Оң тарапта</option>
+                        <option value="left">Сол тарапта</option>
+                    </select>
+                </div>
+            </div>
+
+            <label>Жылуу ылдамдыгы (секунда): <span id="speedDisplay">15</span>s</label>
+            <input type="range" id="c_speed" min="5" max="60" value="15" oninput="speedDisplay.innerText = this.value; drawCanvas()">
+
+            <div class="preview-box">
+                <canvas id="ledCanvas"></canvas>
+            </div>
+
+            <div class="price-tag" id="c_priceDisplay">Баасы: 50 сом</div>
+            <p style="text-align:center; font-size:12px; color:#aaa;">Сүрөт кошулса баага +30 сом кошулат.</p>
+
+            <!-- Админ бекер жасоо үчүн жашыруун баскыч (кардарлар көрбөйт) -->
+            <button class="btn btn-green" id="btnPay" onclick="showPage('paymentPage')">Улантуу (Төлөө)</button>
+            <button class="btn" id="btnAdminFree" style="display: none; background: #f59e0b; color: #000;" onclick="generateFinalCode(true)">Админ: Бекер жасоо</button>
+        </div>
+    </div>
+
+    <!-- ТӨЛӨМ БЕТИ -->
+    <div id="paymentPage" class="page">
+        <div class="panel" style="text-align: center;">
+            <h2>2. Төлөм жасоо</h2>
+            <p>Кодду алуу үчүн төмөнкү QR кодду сканерлеп, <b id="p_finalPrice">50</b> сом төлөңүз.</p>
+            
+            <div style="background: #fff; padding: 20px; border-radius: 10px; display: inline-block; margin: 10px auto; color: #000;">
+                <p style="font-weight: bold; font-size: 18px;">MBank QR</p>
+                <p style="font-size: 20px; font-weight: bold; letter-spacing: 2px;">0556-652-652</p>
+            </div>
+            
+            <button class="btn" onclick="generateFinalCode(false)">Мен төлөдүм, кодду көрсөт</button>
+            <button class="btn btn-red" onclick="showPage('clientPage')">Артка</button>
+        </div>
+    </div>
+
+    <!-- НАТЫЙЖА БЕТИ -->
+    <div id="resultPage" class="page">
+        <div class="panel">
+            <h2>3. Сиздин код даяр!</h2>
+            
+            <!-- Текшерүү шилтемеси -->
+            <div class="verify-box">
+                <strong>Текшерүү шилтемеси (Preview Link):</strong><br>
+                <a href="#" id="verifyLink" target="_blank" style="color: #38bdf8; text-decoration: underline;">Шилтемени ачуу</a>
+                <p style="font-size: 12px; color: #aaa; margin-top: 5px;">Бул шилтеме аркылуу сиз жасаган дизайнды башка адамдарга көрсөтө аласыз.</p>
+            </div>
+
+            <p>Төмөнкү кодду көчүрүп алып, өзүңүздүн баракчаңызга койсоңуз болот:</p>
+            <textarea id="finalCode" style="width:100%; height:200px; background:#000; color:#0f0; padding:10px; border:1px solid #333; font-family:monospace; font-size: 12px;" readonly></textarea>
+            
+            <button class="btn" onclick="copyFinalCode()">Кодду көчүрүү</button>
+
+            <!-- Социалдык тармактарга бөлүшүү -->
+            <h3 style="margin-top: 25px; text-align: center;">Бөлүшүү (Share):</h3>
+            <div class="social-btns">
+                <button class="social-btn whatsapp" onclick="shareSocial('whatsapp')"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+                <button class="social-btn telegram" onclick="shareSocial('telegram')"><i class="fab fa-telegram-plane"></i> Telegram</button>
+                <button class="social-btn instagram" onclick="shareSocial('instagram')"><i class="fab fa-instagram"></i> Instagram</button>
+                <button class="social-btn tiktok" onclick="shareSocial('tiktok')"><i class="fab fa-tiktok"></i> TikTok</button>
+                <button class="social-btn" style="background:#555;" onclick="shareSocial('copy')"><i class="fas fa-link"></i> Шилтемени көчүрүү</button>
+            </div>
+
+            <button class="btn btn-red" style="margin-top: 20px;" onclick="showPage('clientPage')">Башкы бетке кайтуу</button>
+        </div>
+    </div>
+
+    <!-- АДМИН КИРҮҮ БЕТИ -->
+    <div id="adminLoginPage" class="page">
+        <div class="panel" style="max-width: 400px; margin-top: 50px;">
+            <h2>Админ панелге кирүү</h2>
+            <label>Логин:</label>
+            <input type="text" id="loginUser" value="admin">
+            <label>Пароль:</label>
+            <input type="password" id="loginPass">
+            <button class="btn" onclick="checkLogin()">Кирүү</button>
+            <button class="btn btn-red" onclick="showPage('clientPage')">Кардарлар бетине кайтуу</button>
+        </div>
+    </div>
+
+    <!-- АДМИН ПАНЕЛИ -->
+    <div id="adminPanelPage" class="page">
+        <div class="panel">
+            <h2>⚙️ Админ Башкаруу Панели</h2>
+            
+            <h3>Логин жана Пароль алмаштыруу</h3>
+            <label>Жаңы Логин:</label>
+            <input type="text" id="newUser">
+            <label>Жаңы Пароль:</label>
+            <input type="password" id="newPass">
+            <button class="btn btn-green" onclick="updateAdminCredentials()">Сактоо</button>
+            <p id="adminMsg" style="color: #fbbf24; font-size: 14px; margin-top: 10px;"></p>
+
+            <hr style="border-color: #334155; margin: 30px 0;">
+
+            <h3>Бааларды жөндөө</h3>
+            <label>Текст үчүн негизги баа (сом):</label>
+            <input type="number" id="priceTextBase" value="50">
+            <label>Сүрөт кошулгандагы кошумча баа (сом):</label>
+            <input type="number" id="priceImageAdd" value="30">
+            <button class="btn" onclick="updatePrices()">Бааларды сактоо</button>
+            <p id="priceMsg" style="color: #fbbf24; font-size: 14px; margin-top: 10px;"></p>
+
+            <br><br>
+            <button class="btn btn-red" onclick="logout()">Чыгуу (Logout)</button>
+        </div>
+    </div>
+
+    <script>
+        // --- АДМИН ЖАНА БААЛОО ---
+        let adminUser = localStorage.getItem('adminUser') || 'admin';
+        let adminPass = localStorage.getItem('adminPass') || '123';
+        let priceBase = parseInt(localStorage.getItem('priceBase')) || 50;
+        let priceImg = parseInt(localStorage.getItem('priceImg')) || 30;
+        let isAdminLoggedIn = false;
+
+        document.getElementById('newUser').value = adminUser;
+        document.getElementById('newPass').value = adminPass;
+        document.getElementById('priceTextBase').value = priceBase;
+        document.getElementById('priceImageAdd').value = priceImg;
+
+        let currentImageBase64 = ""; 
+        let currentImageObj = new Image();
+
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        // --- CANVAS ЛОГИКАСЫ ---
+        const canvas = document.getElementById('ledCanvas');
+        const ctx = canvas.getContext('2d');
+        let animationId;
+        let canvasOffset = 0;
+
+        function resizeCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width * 2; 
+            canvas.height = rect.height * 2;
+            drawCanvas();
+        }
+        window.addEventListener('resize', resizeCanvas);
+
+        function drawCanvas() {
+            cancelAnimationFrame(animationId);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // LED Фону
+            ctx.fillStyle = "#050505";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#111";
+            for(let i=0; i<canvas.width; i+=8) {
+                for(let j=0; j<canvas.height; j+=8) {
+                    ctx.beginPath();
+                    ctx.arc(i, j, 1.5, 0, Math.PI*2);
+                    ctx.fill();
+                }
+            }
+
+            let startX = canvasOffset;
+            let text1 = document.getElementById('c_text1').value;
+            let text2 = document.getElementById('c_text2').value;
+            let color1 = document.getElementById('c_color1').value;
+            let color2 = document.getElementById('c_color2').value;
+            let imgSize = parseInt(document.getElementById('c_imgSize').value) * 2;
+            let imgPos = document.getElementById('c_imgPos').value;
+
+            let imgWidth = 0;
+            if (currentImageObj.src) {
+                let aspect = currentImageObj.width / currentImageObj.height;
+                imgWidth = imgSize * aspect;
+                let imgY = (canvas.height - imgSize) / 2;
+
+                if (imgPos === "right") {
+                    ctx.drawImage(currentImageObj, startX + 800, imgY, imgWidth, imgSize);
+                } else {
+                    ctx.drawImage(currentImageObj, startX, imgY, imgWidth, imgSize);
+                }
+            }
+
+            let textX = imgPos === "right" ? startX + 50 : startX + imgWidth + 50;
+            if (!currentImageObj.src) textX = startX + 50;
+
+            ctx.font = "bold 80px Arial";
+            ctx.fillStyle = color1;
+            ctx.shadowColor = color1;
+            ctx.shadowBlur = 30; 
+            ctx.fillText(text1, textX, canvas.height / 2);
+
+            ctx.font = "bold 40px Arial";
+            ctx.fillStyle = color2;
+            ctx.shadowColor = color2;
+            ctx.shadowBlur = 20;
+            ctx.fillText(text2, textX + 20, (canvas.height / 2) + 70);
+
+            ctx.shadowBlur = 15;
+            ctx.fillStyle = "#ff00ff";
+            ctx.fillRect(textX, (canvas.height / 2) + 100, 600, 4);
+
+            canvasOffset -= 2; 
+            if (canvasOffset < -(canvas.width + 1000)) {
+                canvasOffset = 100;
+            }
+
+            animationId = requestAnimationFrame(drawCanvas);
+        }
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentImageBase64 = e.target.result; 
+                    currentImageObj.onload = function() { drawCanvas(); };
+                    currentImageObj.src = currentImageBase64;
+                    calculatePrice();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function calculatePrice() {
+            if (isAdminLoggedIn) {
+                document.getElementById('c_priceDisplay').innerText = `Баасы: Бекер (Админ)`;
+                document.getElementById('p_finalPrice').innerText = "0";
+                return;
+            }
+
+            let totalPrice = priceBase;
+            if (currentImageBase64) totalPrice += priceImg;
+            document.getElementById('c_priceDisplay').innerText = `Баасы: ${totalPrice} сом`;
+            document.getElementById('p_finalPrice').innerText = totalPrice;
+        }
+
+        // --- ДАЯР КОДДУ ЖАНА ШИЛТЕМЕНИ ЖАРАТУУ ---
+        function generateFinalCode(isAdminFree = false) {
+            const currentCode = `<!-- TILATA Professional LED Canvas -->
+<div style="background:#000; border:10px solid #222; border-radius:10px; overflow:hidden; width:100%; max-width:800px; height:300px; margin:0 auto; box-shadow: inset 0 0 20px #000, 0 0 15px rgba(0,255,204,0.2);">
+    <canvas id="tilataCanvas" style="width:100%; height:100%;"></canvas>
+</div>
+
+<script>
+    const cvs = document.getElementById('tilataCanvas');
+    const c = cvs.getContext('2d');
+    cvs.width = 800; cvs.height = 300;
+    let offset = 800;
+
+    const img = new Image();
+    img.src = "${currentImageBase64}"; 
+
+    function render() {
+        c.clearRect(0, 0, cvs.width, cvs.height);
+        
+        c.fillStyle = "#050505"; c.fillRect(0, 0, cvs.width, cvs.height);
+        c.fillStyle = "#111";
+        for(let i=0; i<cvs.width; i+=8) { for(let j=0; j<cvs.height; j+=8) { c.beginPath(); c.arc(i, j, 1.5, 0, Math.PI*2); c.fill(); } }
+
+        if(img.complete && img.naturalHeight !== 0) {
+            if("${document.getElementById('c_imgPos').value}" === "right") {
+                c.drawImage(img, offset + 500, 50, 200, 200);
+            } else {
+                c.drawImage(img, offset, 50, 200, 200);
+            }
+        }
+
+        let tX = "${document.getElementById('c_imgPos').value}" === "right" ? offset : offset + 220;
+        
+        c.font = "bold 70px Arial";
+        c.fillStyle = "${document.getElementById('c_color1').value}";
+        c.shadowColor = c.fillStyle; c.shadowBlur = 20;
+        c.fillText("${document.getElementById('c_text1').value}", tX, 130);
+
+        c.font = "bold 35px Arial";
+        c.fillStyle = "${document.getElementById('c_color2').value}";
+        c.shadowColor = c.fillStyle; c.shadowBlur = 15;
+        c.fillText("${document.getElementById('c_text2').value}", tX + 10, 190);
+
+        c.fillStyle = "#ff00ff"; c.shadowBlur = 10;
+        c.fillRect(tX, 210, 400, 4);
+
+        offset -= 1.5; 
+        if(offset < -1000) offset = 800;
+
+        requestAnimationFrame(render);
+    }
+    img.onload = render;
+    if(img.complete) render();
+<\/script>`;
+
+            document.getElementById('finalCode').value = currentCode;
+            
+            // Текшерүү шилтемесин жасоо (Base64 аркылуу шилтеме)
+            const previewLink = "data:text/html;charset=utf-8," + encodeURIComponent(currentCode);
+            document.getElementById('verifyLink').href = previewLink;
+
+            // Админ бекер жасаса, каттоо
+            if (isAdminFree) {
+                alert("Админ катары бул дизайнды бекер жасадыңыз!");
+            }
+
+            showPage('resultPage');
+        }
+
+        function copyFinalCode() {
+            const copyText = document.getElementById("finalCode");
+            copyText.select();
+            navigator.clipboard.writeText(copyText.value);
+            alert("Код ийгиликтүү көчүрүлдү!");
+        }
+
+        // --- СОЦИАЛДЫК ТАРМАКТАРГА БӨЛҮШҮҮ ---
+        function shareSocial(platform) {
+            // Текшерүү шилтемесин алуу
+            const link = document.getElementById('verifyLink').href;
+            const text = "TILATA менен жасалган LED бегущая строка! Карап көрүңүз:";
+
+            if (platform === 'whatsapp') {
+                window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text + " " + link)}`, '_blank');
+            } else if (platform === 'telegram') {
+                window.open(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`, '_blank');
+            } else if (platform === 'copy') {
+                navigator.clipboard.writeText(link).then(() => {
+                    alert("Текшерүү шилтемеси көчүрүлдү! (Instagram, TikTok үчүн бул шилтемени билдирүүгө чаптаңыз)");
+                });
+            } else if (platform === 'instagram' || platform === 'tiktok') {
+                // Instagram жана TikTok түз шилтеме жөнөтүүнү колдобойт, ошондуктан шилтемени көчүрөбүз
+                navigator.clipboard.writeText(link).then(() => {
+                    alert(`Шилтеме көчүрүлдү! Азыр ${platform.toUpperCase()} тиркемесин ачып, досторуңузга чаптап жибере аласыз.`);
+                });
+            }
+        }
+
+        // --- АДМИН ФУНКЦИЯЛАРЫ ---
+        function checkLogin() {
+            const user = document.getElementById('loginUser').value;
+            const pass = document.getElementById('loginPass').value;
+            if (user === adminUser && pass === adminPass) {
+                isAdminLoggedIn = true;
+                showPage('clientPage');
+                document.getElementById('loginPass').value = ""; 
+                
+                // Админ бекер жасоо баскычтарын көрсөтүү
+                document.getElementById('btnAdminFree').style.display = 'block';
+                document.getElementById('btnPay').style.display = 'none';
+                document.getElementById('adminFreeBadge').style.display = 'inline-block';
+                calculatePrice();
+                alert("Админ катары кирдиңиз. Эми сиз бекер жасай аласыз.");
+            } else {
+                alert("Логин же пароль туура эмес!");
+            }
+        }
+
+        function updateAdminCredentials() {
+            const newU = document.getElementById('newUser').value;
+            const newP = document.getElementById('newPass').value;
+            if(newU && newP) {
+                localStorage.setItem('adminUser', newU);
+                localStorage.setItem('adminPass', newP);
+                adminUser = newU; adminPass = newP;
+                document.getElementById('adminMsg').innerText = "Ийгиликтүү өзгөртүлдү!";
+                setTimeout(() => { document.getElementById('adminMsg').innerText = ""; }, 3000);
+            } else { alert("Бош калтырбаңыз!"); }
+        }
+
+        function updatePrices() {
+            const pBase = parseInt(document.getElementById('priceTextBase').value);
+            const pImg = parseInt(document.getElementById('priceImageAdd').value);
+            if(!isNaN(pBase) && !isNaN(pImg)) {
+                localStorage.setItem('priceBase', pBase);
+                localStorage.setItem('priceImg', pImg);
+                priceBase = pBase; priceImg = pImg;
+                document.getElementById('priceMsg').innerText = "Баалар сакталды!";
+                setTimeout(() => { document.getElementById('priceMsg').innerText = ""; }, 3000);
+                calculatePrice(); 
+            }
+        }
+
+        function logout() {
+            isAdminLoggedIn = false;
+            document.getElementById('btnAdminFree').style.display = 'none';
+            document.getElementById('btnPay').style.display = 'block';
+            document.getElementById('adminFreeBadge').style.display = 'none';
+            calculatePrice();
+            showPage('clientPage');
+        }
+
+        setTimeout(() => { resizeCanvas(); }, 100);
+    </script>
+</body>
+</html>
